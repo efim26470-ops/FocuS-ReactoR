@@ -3,184 +3,231 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#070a12">
+  <meta name="theme-color" content="#05070b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Focus Reactor">
   <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.css">
   <title>Focus Reactor</title>
 </head>
-<body data-theme="void">
-  <div class="ambient ambient-a"></div>
-  <div class="ambient ambient-b"></div>
-  <div class="noise"></div>
+<body data-theme="oled" data-theme-style="precision">
+  <div class="world-effects" aria-hidden="true">
+    <i class="ambient ambient-a"></i><i class="ambient ambient-b"></i><i class="grid-floor"></i><i class="noise"></i>
+  </div>
 
   <div id="app" class="app-shell">
     <header class="topbar glass">
-      <button class="brand" data-view="timer" aria-label="Главный экран">
+      <button class="brand" data-view="timer" aria-label="Открыть реактор">
         <span class="brand-mark">⚛</span>
-        <span>
-          <strong>Focus Reactor</strong>
-          <small id="systemStatus">Система готова</small>
-        </span>
+        <span><strong>Focus Reactor</strong><small id="systemStatus">Лаборатория готова</small></span>
       </button>
+      <div class="resource-strip" aria-label="Ресурсы лаборатории">
+        <span class="resource-chip" title="Очки исследований"><i>⌬</i><b id="headerResearch">0</b></span>
+        <span class="resource-chip" title="Энергия лаборатории"><i>ϟ</i><b id="headerEnergy">0</b></span>
+        <span class="resource-chip level-chip" title="Уровень оператора"><i>LV</i><b id="headerLevel">1</b></span>
+      </div>
       <div class="top-actions">
         <button id="soundToggle" class="icon-btn" aria-label="Фоновый звук">◖</button>
-        <button id="themeButton" class="icon-btn" aria-label="Выбрать тему">✦</button>
+        <button id="themeButton" class="icon-btn" aria-label="Темы">✦</button>
         <button id="focusModeButton" class="icon-btn" aria-label="Полноэкранный режим">⛶</button>
       </div>
     </header>
 
     <main>
       <section id="view-timer" class="view active">
-        <div class="mode-strip" id="modeStrip"></div>
+        <div class="mode-strip" id="modeStrip" aria-label="Режимы фокуса"></div>
 
-        <section class="reactor-stage glass" aria-label="Таймер реактора">
+        <section class="reactor-stage glass" id="reactorStage">
           <div class="stage-header">
             <div>
               <span class="eyebrow" id="phaseLabel">РАБОЧИЙ ЦИКЛ</span>
-              <h1 id="sessionTitle">Загрузка реактора</h1>
+              <h1 id="sessionTitle">Реактор ожидает оператора</h1>
+              <button id="activeProjectButton" class="project-pill"><span id="activeProjectIcon">💻</span><span id="activeProjectName">Программирование</span><i>⌄</i></button>
             </div>
-            <button id="reactorSelectButton" class="chip"><span id="reactorEmoji">⚛️</span><span id="reactorName">Нулевое ядро</span>⌄</button>
+            <div class="stage-meta">
+              <span id="reactorStateBadge" class="state-badge stable"><i></i><b>Стабильный</b></span>
+              <button id="reactorSelectButton" class="chip"><span id="reactorEmoji">⚛️</span><span id="reactorName">Нулевое ядро</span><i>⌄</i></button>
+            </div>
           </div>
 
-          <div class="reactor-wrap">
-            <div class="reactor-halo"></div>
-            <div class="reactor" id="reactor">
-              <div class="reactor-ring ring-outer"></div>
-              <div class="reactor-ring ring-middle"></div>
-              <div class="reactor-ring ring-inner"></div>
-              <div class="reactor-core">
-                <div class="energy-fill" id="energyFill"></div>
-                <div class="core-symbol" id="coreSymbol">⚛</div>
-                <div class="core-shine"></div>
+          <div class="reactor-console">
+            <div class="reactor-zone">
+              <div class="reactor-halo"></div>
+              <div class="reactor" id="reactor">
+                <div class="reactor-ring ring-outer"></div>
+                <div class="reactor-ring ring-middle"></div>
+                <div class="reactor-ring ring-inner"></div>
+                <div class="reactor-core">
+                  <div class="energy-fill" id="energyFill"></div>
+                  <div class="core-symbol" id="coreSymbol">⚛</div>
+                  <div class="core-shine"></div>
+                </div>
+                <span class="particle p1"></span><span class="particle p2"></span><span class="particle p3"></span>
+                <span class="particle p4"></span><span class="particle p5"></span><span class="particle p6"></span>
+                <span class="particle p7"></span><span class="particle p8"></span>
               </div>
-              <span class="particle p1"></span><span class="particle p2"></span><span class="particle p3"></span>
-              <span class="particle p4"></span><span class="particle p5"></span><span class="particle p6"></span>
+              <div id="reactorEvent" class="reactor-event">Ядро синхронизировано</div>
             </div>
-            <div class="stability-meter">
-              <span>СТАБИЛЬНОСТЬ</span>
-              <div class="meter-track"><i id="stabilityBar"></i></div>
-              <strong id="stabilityValue">100%</strong>
+
+            <div class="telemetry-panel">
+              <div class="telemetry-card heat"><span>ТЕМПЕРАТУРА</span><strong><b id="temperatureValue">34</b>°C</strong><div class="micro-meter"><i id="temperatureBar"></i></div></div>
+              <div class="telemetry-card pressure"><span>ДАВЛЕНИЕ</span><strong><b id="pressureValue">1.0</b> бар</strong><div class="micro-meter"><i id="pressureBar"></i></div></div>
+              <div class="telemetry-card energy"><span>ЭНЕРГИЯ</span><strong><b id="reactorEnergyValue">0</b>%</strong><div class="micro-meter"><i id="reactorEnergyBar"></i></div></div>
+              <div class="telemetry-card stability"><span>СТАБИЛЬНОСТЬ</span><strong><b id="stabilityValue">100</b>%</strong><div class="micro-meter"><i id="stabilityBar"></i></div></div>
+              <button id="emergencyCoolingButton" class="cooling-button" disabled><span>❄</span><b>Аварийное охлаждение</b><small id="coolingHint">Система в норме</small></button>
             </div>
           </div>
 
           <div class="timer-block">
             <div id="timerDisplay" class="timer-display">25:00</div>
-            <div id="timerHint" class="timer-hint">Один цикл — и Вселенная станет продуктивнее</div>
+            <div id="timerHint" class="timer-hint">Один цикл — и лаборатория станет умнее</div>
           </div>
 
           <div class="main-controls">
-            <button id="resetButton" class="round-btn secondary" aria-label="Сбросить">↺</button>
+            <button id="resetButton" class="round-btn secondary" aria-label="Сбросить цикл">↺</button>
             <button id="startButton" class="primary-control"><span id="startIcon">▶</span><span id="startText">Запустить</span></button>
-            <button id="interruptButton" class="round-btn danger" aria-label="Зафиксировать прерывание">!</button>
+            <button id="finishSessionButton" class="round-btn finish" aria-label="Завершить сессию">■</button>
+            <button id="interruptButton" class="round-btn danger" aria-label="Зафиксировать отвлечение">!</button>
           </div>
 
           <div class="mini-stats">
-            <div><span>Заряд</span><strong id="chargeValue">0%</strong></div>
-            <div><span>Серия</span><strong id="streakValue">0</strong></div>
-            <div><span>Прерывания</span><strong id="interruptionsValue">0</strong></div>
+            <div><span>Фактически</span><strong id="actualTimeValue">0 мин</strong></div>
+            <div><span>Серия дней</span><strong id="dayStreakValue">0</strong></div>
+            <div><span>Отвлечения</span><strong id="interruptionsValue">0</strong></div>
+            <div><span>Паузы</span><strong id="pauseCountValue">0</strong></div>
           </div>
+        </section>
+
+        <section id="breakCoach" class="break-coach glass hidden">
+          <div class="break-visual"><span id="breakTaskIcon">◉</span><i></i></div>
+          <div><span class="eyebrow">УМНЫЙ ПЕРЕРЫВ</span><h2 id="breakTaskTitle">Дыхание 4–4</h2><p id="breakTaskDescription">Вдохни на четыре счёта и выдохни на четыре.</p></div>
+          <button id="breakTaskDoneButton" class="small-btn">Выполнено + стабильность</button>
         </section>
 
         <section class="dashboard-grid">
           <article class="panel glass goals-panel">
-            <div class="panel-title-row">
-              <div><span class="eyebrow">МИССИИ</span><h2>Блоки целей</h2></div>
-              <button id="addGoalButton" class="small-btn">+ Цель</button>
-            </div>
+            <div class="panel-title-row"><div><span class="eyebrow">СЕГОДНЯ</span><h2>Блоки целей</h2></div><button id="addGoalButton" class="small-btn">+ Цель</button></div>
             <div id="goalsList" class="goals-list"></div>
           </article>
-
-          <article class="panel glass daily-panel">
-            <div class="panel-title-row">
-              <div><span class="eyebrow">СЕГОДНЯ</span><h2>Выработка</h2></div>
-              <span class="badge" id="todayEfficiency">0%</span>
-            </div>
-            <div class="energy-summary">
-              <div class="summary-orb"><span id="todayMinutes">0</span><small>мин</small></div>
-              <div class="summary-bars">
-                <div><span>Фокус</span><i><b id="focusBar"></b></i></div>
-                <div><span>Стабильность</span><i><b id="dailyStabilityBar"></b></i></div>
-                <div><span>Цели</span><i><b id="goalsBar"></b></i></div>
-              </div>
-            </div>
+          <article class="panel glass contract-preview">
+            <div class="panel-title-row"><div><span class="eyebrow">КОНТРАКТ</span><h2>Ближайшая награда</h2></div><button class="small-btn" data-view="lab">Все задания</button></div>
+            <div id="contractPreview"></div>
           </article>
         </section>
       </section>
 
-      <section id="view-stats" class="view">
-        <div class="page-heading"><div><span class="eyebrow">ТЕЛЕМЕТРИЯ</span><h1>Статистика реактора</h1></div><button id="exportButton" class="small-btn">Экспорт</button></div>
-        <div class="stat-cards">
-          <article class="stat-card glass"><span>Сегодня</span><strong id="statToday">0 мин</strong><small id="statTodaySessions">0 циклов</small></article>
-          <article class="stat-card glass"><span>Неделя</span><strong id="statWeek">0 ч</strong><small id="statWeekSessions">0 циклов</small></article>
-          <article class="stat-card glass"><span>Всего</span><strong id="statTotal">0 ч</strong><small id="statTotalSessions">0 циклов</small></article>
-          <article class="stat-card glass"><span>Лучшая серия</span><strong id="statBestStreak">0</strong><small>циклов подряд</small></article>
+      <section id="view-lab" class="view">
+        <div class="page-heading"><div><span class="eyebrow">КОМПЛЕКС FR-01</span><h1>Карта лаборатории</h1><p>Комнаты открываются за исследования и усиливают основные системы.</p></div><span id="labProgressBadge" class="badge">1 / 8</span></div>
+        <div id="labMap" class="lab-map"></div>
+        <div class="contracts-layout">
+          <article class="panel glass"><div class="panel-title-row"><div><span class="eyebrow">ОБНОВЛЯЮТСЯ ЕЖЕДНЕВНО</span><h2>Дневные контракты</h2></div><span id="dailyReset" class="badge">—</span></div><div id="dailyContracts" class="contract-list"></div></article>
+          <article class="panel glass"><div class="panel-title-row"><div><span class="eyebrow">НЕДЕЛЬНАЯ СМЕНА</span><h2>Большие задания</h2></div><span id="weeklyReset" class="badge">—</span></div><div id="weeklyContracts" class="contract-list"></div></article>
         </div>
-        <article class="panel glass chart-panel">
-          <div class="panel-title-row"><div><span class="eyebrow">7 ДНЕЙ</span><h2>Выработка по дням</h2></div><span id="weekTotalBadge" class="badge">0 мин</span></div>
-          <div id="dayChart" class="bar-chart"></div>
-        </article>
-        <article class="panel glass chart-panel">
-          <div class="panel-title-row"><div><span class="eyebrow">ПО ЧАСАМ</span><h2>Когда ты наиболее опасен</h2></div><span id="bestHourBadge" class="badge">—</span></div>
-          <div id="hourChart" class="hour-chart"></div>
-        </article>
-        <article class="panel glass history-panel">
-          <div class="panel-title-row"><div><span class="eyebrow">ЖУРНАЛ</span><h2>Последние циклы</h2></div></div>
-          <div id="historyList" class="history-list"></div>
-        </article>
+      </section>
+
+      <section id="view-research" class="view">
+        <div class="page-heading"><div><span class="eyebrow">НАУЧНЫЙ ОТДЕЛ</span><h1>Дерево исследований</h1><p>Трать очки исследований на постоянные улучшения реактора.</p></div><span class="research-balance"><i>⌬</i><b id="researchBalance">0</b></span></div>
+        <div id="researchBranches" class="research-branches"></div>
+      </section>
+
+      <section id="view-projects" class="view">
+        <div class="page-heading"><div><span class="eyebrow">ПРОЕКТНЫЙ СЕКТОР</span><h1>Проекты</h1><p>Каждая фокус-сессия попадает в выбранный проект и его личную статистику.</p></div><button id="addProjectButton" class="small-btn">+ Проект</button></div>
+        <article id="activeProjectSummary" class="active-project-summary glass"></article>
+        <div id="projectsGrid" class="projects-grid"></div>
+      </section>
+
+      <section id="view-stats" class="view">
+        <div class="page-heading"><div><span class="eyebrow">ТЕЛЕМЕТРИЯ</span><h1>Аналитика концентрации</h1><p id="analyticsSummary">Данных пока недостаточно для точного прогноза.</p></div><button id="exportButton" class="small-btn">Экспорт</button></div>
+        <div class="stat-cards">
+          <article class="stat-card glass"><span>Сегодня</span><strong id="statToday">0 мин</strong><small id="statTodaySessions">0 сессий</small></article>
+          <article class="stat-card glass"><span>Неделя</span><strong id="statWeek">0 ч</strong><small id="statWeekSessions">0 сессий</small></article>
+          <article class="stat-card glass"><span>Средняя сессия</span><strong id="statAverage">0 мин</strong><small id="statAverageStability">100% стабильности</small></article>
+          <article class="stat-card glass"><span>Прогноз недели</span><strong id="statForecast">0%</strong><small id="statForecastText">цели 10 часов</small></article>
+        </div>
+        <div id="insightCards" class="insight-grid"></div>
+        <div class="analytics-grid">
+          <article class="panel glass chart-panel"><div class="panel-title-row"><div><span class="eyebrow">ПО ЧАСАМ</span><h2>Лучшее время</h2></div><span id="bestHourBadge" class="badge">—</span></div><div id="hourChart" class="chart-bars compact"></div></article>
+          <article class="panel glass chart-panel"><div class="panel-title-row"><div><span class="eyebrow">ПО ДНЯМ НЕДЕЛИ</span><h2>Рабочий ритм</h2></div><span id="bestDayBadge" class="badge">—</span></div><div id="weekdayChart" class="chart-bars"></div></article>
+          <article class="panel glass chart-panel"><div class="panel-title-row"><div><span class="eyebrow">14 ДНЕЙ</span><h2>Стабильность ядра</h2></div><span id="stabilityTrendBadge" class="badge">—</span></div><div id="stabilityChart" class="chart-bars"></div></article>
+          <article class="panel glass chart-panel"><div class="panel-title-row"><div><span class="eyebrow">РАСПРЕДЕЛЕНИЕ</span><h2>Время по проектам</h2></div><span id="projectShareBadge" class="badge">—</span></div><div id="projectChart" class="distribution-chart"></div></article>
+          <article class="panel glass chart-panel"><div class="panel-title-row"><div><span class="eyebrow">СРАВНЕНИЕ РЕЖИМОВ</span><h2>25/5 против 50/10</h2></div></div><div id="modeComparison" class="comparison-list"></div></article>
+          <article class="panel glass chart-panel"><div class="panel-title-row"><div><span class="eyebrow">СРЕДА</span><h2>Темы и фоновые звуки</h2></div></div><div id="environmentImpact" class="comparison-list"></div></article>
+        </div>
+        <article class="panel glass history-panel"><div class="panel-title-row"><div><span class="eyebrow">ЖУРНАЛ</span><h2>Последние сессии</h2></div><button id="clearHistoryFilters" class="small-btn">Все проекты</button></div><div id="historyList" class="history-list"></div></article>
       </section>
 
       <section id="view-achievements" class="view">
-        <div class="page-heading"><div><span class="eyebrow">АРХИВ ЛАБОРАТОРИИ</span><h1>Достижения</h1></div><span id="achievementCount" class="badge">0 / 0</span></div>
-        <div id="achievementsGrid" class="achievement-grid"></div>
+        <div class="page-heading"><div><span class="eyebrow">ХРАНИЛИЩЕ ДОСТИЖЕНИЙ</span><h1>Многоуровневые награды</h1><p>Каждая категория имеет собственную лестницу прогресса.</p></div><span id="achievementCount" class="badge">0 наград</span></div>
+        <div id="achievementGroups" class="achievement-groups"></div>
+        <article class="panel glass secret-panel"><div class="panel-title-row"><div><span class="eyebrow">ЗАСЕКРЕЧЕНО</span><h2>Секретные достижения</h2></div></div><div id="secretAchievements" class="achievement-grid"></div></article>
       </section>
 
       <section id="view-settings" class="view">
-        <div class="page-heading"><div><span class="eyebrow">КОНТРОЛЬНАЯ ПАНЕЛЬ</span><h1>Настройки</h1></div></div>
-        <article class="panel glass settings-list">
-          <button class="settings-row" id="settingsTheme"><span><b>Визуальная тема</b><small id="currentThemeName">Космическая пустота</small></span><i>›</i></button>
-          <button class="settings-row" id="settingsSound"><span><b>Фоновый звук</b><small id="currentSoundName">Выключен</small></span><i>›</i></button>
-          <button class="settings-row" id="settingsReactor"><span><b>Активный реактор</b><small id="currentReactorName">Нулевое ядро</small></span><i>›</i></button>
-          <button class="settings-row" id="settingsCustomMode"><span><b>Собственный режим</b><small id="customModeLabel">40 / 10 минут</small></span><i>›</i></button>
-          <button class="settings-row" id="installButton"><span><b>Установить приложение</b><small>Добавить Focus Reactor на устройство</small></span><i>＋</i></button>
-          <label class="settings-row switch-row"><span><b>Автозапуск перерыва</b><small>После успешной рабочей сессии</small></span><input type="checkbox" id="autoBreakToggle"><i class="switch"></i></label>
-          <label class="settings-row switch-row"><span><b>Защита от случайных нажатий</b><small>Автоблокировка после запуска</small></span><input type="checkbox" id="autoLockToggle"><i class="switch"></i></label>
-          <label class="settings-row switch-row"><span><b>Вибрация</b><small>Тактильный отклик на iPhone</small></span><input type="checkbox" id="hapticsToggle"><i class="switch"></i></label>
-        </article>
-        <article class="panel glass danger-zone">
-          <div><span class="eyebrow">ДАННЫЕ</span><h2>Резервная копия</h2><p>Статистика хранится локально на устройстве.</p></div>
-          <div class="button-row"><button id="backupButton" class="small-btn">Скачать JSON</button><button id="importButton" class="small-btn">Импорт</button><button id="resetDataButton" class="small-btn danger-text">Сбросить</button></div>
-          <input type="file" id="importFile" accept="application/json" hidden>
-        </article>
+        <div class="page-heading"><div><span class="eyebrow">ЦЕНТР УПРАВЛЕНИЯ</span><h1>Настройки и данные</h1></div></div>
+        <div class="settings-grid">
+          <article class="panel glass settings-list">
+            <button class="settings-row" id="settingsTheme"><span><b>Визуальная тема</b><small id="currentThemeName">OLED Black</small></span><i>›</i></button>
+            <button class="settings-row" id="settingsSound"><span><b>Фоновый звук</b><small id="currentSoundName">Выключен</small></span><i>›</i></button>
+            <button class="settings-row" id="settingsReactor"><span><b>Активный реактор</b><small id="currentReactorName">Нулевое ядро</small></span><i>›</i></button>
+            <button class="settings-row" id="settingsProfileFrame"><span><b>Рамка оператора</b><small id="currentFrameName">Стандартная</small></span><i>›</i></button>
+            <button class="settings-row" id="settingsCoreEffect"><span><b>Анимация ядра</b><small id="currentEffectName">Стандартная</small></span><i>›</i></button>
+            <button class="settings-row" id="settingsCustomMode"><span><b>Собственный режим</b><small id="customModeLabel">40 / 10 минут</small></span><i>›</i></button>
+            <button class="settings-row" id="settingsWeeklyGoal"><span><b>Недельная цель</b><small id="weeklyGoalLabel">10 часов</small></span><i>›</i></button>
+            <button class="settings-row" id="installButton"><span><b>Установить приложение</b><small>Добавить Focus Reactor на устройство</small></span><i>＋</i></button>
+            <label class="settings-row switch-row"><span><b>Автозапуск перерыва</b><small>После сохранения отчёта о сессии</small></span><input type="checkbox" id="autoBreakToggle"><i class="switch"></i></label>
+            <label class="settings-row switch-row"><span><b>Защита от случайных нажатий</b><small>Блокировать панель после запуска</small></span><input type="checkbox" id="autoLockToggle"><i class="switch"></i></label>
+            <label class="settings-row switch-row"><span><b>Вибрация</b><small>Тактильные сигналы на поддерживаемых устройствах</small></span><input type="checkbox" id="hapticsToggle"><i class="switch"></i></label>
+            <label class="settings-row switch-row"><span><b>Не выключать экран</b><small>Wake Lock во время активной сессии</small></span><input type="checkbox" id="wakeLockToggle"><i class="switch"></i></label>
+          </article>
+
+          <article class="panel glass export-panel">
+            <div><span class="eyebrow">ИМПОРТ И ЭКСПОРТ</span><h2>Резервные копии и отчёты</h2><p>Все файлы создаются локально. Для PDF используется системное окно печати.</p></div>
+            <div class="export-grid">
+              <button id="backupButton" class="export-button"><span>JSON</span><b>Полная копия</b><small>Перенос на другое устройство</small></button>
+              <button id="csvButton" class="export-button"><span>CSV</span><b>Все сессии</b><small>Таблица для Excel и Numbers</small></button>
+              <button id="htmlReportButton" class="export-button"><span>HTML</span><b>Красивый отчёт</b><small>Открывается в браузере</small></button>
+              <button id="pdfReportButton" class="export-button"><span>PDF</span><b>Печать отчёта</b><small>Сохранение через системную печать</small></button>
+              <button id="statsExportButton" class="export-button"><span>DATA</span><b>Только статистика</b><small>Без настроек приложения</small></button>
+              <button id="projectExportButton" class="export-button"><span>PRJ</span><b>Выбранный проект</b><small>Отдельный CSV-журнал</small></button>
+              <button id="importButton" class="export-button"><span>↥</span><b>Импорт JSON</b><small>Восстановить резервную копию</small></button>
+              <button id="autoBackupsButton" class="export-button"><span>⟳</span><b>Автокопии</b><small id="autoBackupLabel">Нет копий</small></button>
+            </div>
+            <input type="file" id="importFile" accept="application/json" hidden>
+          </article>
+        </div>
+        <article class="panel glass danger-zone"><div><span class="eyebrow">ОПАСНАЯ ОПЕРАЦИЯ</span><h2>Сброс лаборатории</h2><p>Удаляет локальную статистику, проекты, исследования и настройки.</p></div><button id="resetDataButton" class="small-btn danger-text">Удалить все данные</button></article>
       </section>
     </main>
 
-    <nav class="bottom-nav glass">
+    <nav class="bottom-nav glass" aria-label="Навигация">
       <button class="nav-item active" data-view="timer"><span>⚛</span><small>Реактор</small></button>
-      <button class="nav-item" data-view="stats"><span>▥</span><small>Статистика</small></button>
+      <button class="nav-item" data-view="lab"><span>▦</span><small>Лаборатория</small></button>
+      <button class="nav-item" data-view="research"><span>⌬</span><small>Исследования</small></button>
+      <button class="nav-item" data-view="projects"><span>◫</span><small>Проекты</small></button>
+      <button class="nav-item" data-view="stats"><span>▥</span><small>Аналитика</small></button>
       <button class="nav-item" data-view="achievements"><span>✦</span><small>Награды</small></button>
       <button class="nav-item" data-view="settings"><span>⌁</span><small>Настройки</small></button>
     </nav>
   </div>
 
   <div id="focusOverlay" class="focus-overlay" aria-hidden="true">
-    <button id="exitFocusButton" class="focus-exit">×</button>
-    <div class="focus-reactor-clone" id="focusReactorClone"></div>
+    <button id="exitFocusButton" class="focus-exit" aria-label="Выйти">×</button>
+    <span id="focusState" class="state-badge stable"><i></i><b>Стабильный</b></span>
+    <div class="focus-reactor-clone"><div class="focus-core"><span id="focusCoreSymbol">⚛</span></div></div>
     <div id="focusTimer" class="focus-timer">25:00</div>
     <div id="focusPhrase" class="focus-phrase">Не трогай Вселенную. Она фокусируется.</div>
+    <div class="focus-telemetry"><span><small>°C</small><b id="focusTemp">34</b></span><span><small>бар</small><b id="focusPressure">1.0</b></span><span><small>стаб.</small><b id="focusStability">100%</b></span></div>
     <button id="focusToggleButton" class="primary-control"><span>▶</span><span>Запустить</span></button>
     <button id="lockButton" class="chip lock-chip">◉ Заблокировать управление</button>
   </div>
 
   <div id="lockOverlay" class="lock-overlay" aria-hidden="true">
-    <div class="lock-symbol">◉</div>
-    <h2>Панель заблокирована</h2>
-    <p>Удерживай кнопку, чтобы вернуть контроль</p>
+    <div class="lock-symbol">◉</div><h2>Панель заблокирована</h2><p>Удерживай кнопку, чтобы вернуть контроль</p>
     <button id="unlockHoldButton" class="unlock-hold"><span></span><b>Удерживать</b></button>
   </div>
 
@@ -192,8 +239,7 @@
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
-
+  <div id="toast" class="toast" role="status"></div>
   <script src="app.js"></script>
 </body>
 </html>

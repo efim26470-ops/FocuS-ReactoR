@@ -1,22 +1,28 @@
 {
-  "name": "Focus Reactor — фокус-таймер",
+  "id": "./",
+  "name": "Focus Reactor — живая лаборатория концентрации",
   "short_name": "Focus Reactor",
-  "description": "Необычный фокус-таймер с реакторами, сериями, целями, статистикой и достижениями.",
+  "description": "Игровой фокус-таймер с живым реактором, проектами, исследованиями, контрактами, умными перерывами и подробной аналитикой.",
   "lang": "ru",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
-  "orientation": "portrait-primary",
-  "background_color": "#070a12",
-  "theme_color": "#070a12",
-  "categories": ["productivity", "utilities"],
+  "orientation": "any",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["productivity", "utilities", "education"],
   "icons": [
-    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "shortcuts": [
-    {"name":"Запустить фокус","short_name":"Фокус","url":"./?action=focus","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]},
-    {"name":"Открыть статистику","short_name":"Статистика","url":"./?view=stats","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]}
+    {"name":"Открыть реактор","short_name":"Реактор","url":"./?action=focus","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]},
+    {"name":"Карта лаборатории","short_name":"Лаборатория","url":"./?view=lab","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]},
+    {"name":"Проекты","short_name":"Проекты","url":"./?view=projects","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]},
+    {"name":"Аналитика","short_name":"Аналитика","url":"./?view=stats","icons":[{"src":"icons/icon-192.png","sizes":"192x192"}]}
   ]
 }
